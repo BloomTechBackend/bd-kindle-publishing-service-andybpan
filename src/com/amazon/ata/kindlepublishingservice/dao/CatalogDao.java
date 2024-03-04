@@ -58,4 +58,15 @@ public class CatalogDao {
         }
         return results.get(0);
     }
+
+    // Marks an existing book as inactive
+    public CatalogItemVersion removeBookFromCatalog(String bookId) {
+        CatalogItemVersion book = getBookFromCatalog(bookId);
+
+        if (!book.isInactive()) {
+            book.setInactive(true);
+            dynamoDbMapper.save(book);
+        }
+        return book;
+    }
 }
