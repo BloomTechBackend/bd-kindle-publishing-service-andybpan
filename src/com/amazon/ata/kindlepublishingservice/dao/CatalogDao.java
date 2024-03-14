@@ -47,9 +47,9 @@ public class CatalogDao {
         CatalogItemVersion book = new CatalogItemVersion();
         book.setBookId(bookId);
 
-        DynamoDBQueryExpression<CatalogItemVersion> queryExpression = new DynamoDBQueryExpression()
+        DynamoDBQueryExpression<CatalogItemVersion> queryExpression = new DynamoDBQueryExpression<CatalogItemVersion>()
             .withHashKeyValues(book)
-            .withScanIndexForward(false)
+            .withScanIndexForward(false) // returns items in descending version order
             .withLimit(1);
 
         List<CatalogItemVersion> results = dynamoDbMapper.query(CatalogItemVersion.class, queryExpression);
