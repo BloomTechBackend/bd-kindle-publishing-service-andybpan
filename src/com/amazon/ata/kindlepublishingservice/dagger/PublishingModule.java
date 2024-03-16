@@ -6,6 +6,7 @@ import dagger.Module;
 import dagger.Provides;
 
 import java.util.LinkedList;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import javax.inject.Singleton;
@@ -30,5 +31,6 @@ public class PublishingModule {
     @Singleton
     public BookPublishRequestManager provideBookPublishRequestManager() {
         return new BookPublishRequestManager(new LinkedList<BookPublishRequest>());
+        // return new BookPublishRequestManager(new ConcurrentLinkedQueue<BookPublishRequest>());
     }
 }

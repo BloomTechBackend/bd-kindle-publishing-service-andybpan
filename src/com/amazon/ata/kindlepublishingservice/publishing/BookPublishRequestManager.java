@@ -10,8 +10,8 @@ public class BookPublishRequestManager {
     private final Queue<BookPublishRequest> bookPublishRequests;
 
     @Inject
-    public BookPublishRequestManager(LinkedList<BookPublishRequest> linkedList) {
-        this.bookPublishRequests = linkedList;
+    public BookPublishRequestManager(Queue<BookPublishRequest> queue) {
+        this.bookPublishRequests = queue;
     }
 
     public void addBookPublishRequest(BookPublishRequest request) {

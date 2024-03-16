@@ -1,5 +1,7 @@
 package com.amazon.ata.kindlepublishingservice.activity;
 
+import com.amazon.ata.kindlepublishingservice.dynamodb.models.CatalogItemVersion;
+import com.amazon.ata.kindlepublishingservice.publishing.BookPublishRequestManager;
 import com.amazon.ata.recommendationsservice.types.BookGenre;
 import com.amazon.ata.kindlepublishingservice.models.requests.SubmitBookForPublishingRequest;
 import com.amazon.ata.kindlepublishingservice.models.response.SubmitBookForPublishingResponse;
@@ -17,10 +19,7 @@ import org.mockito.Mock;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isA;
-import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
@@ -31,6 +30,12 @@ public class SubmitBookForPublishingActivityTest {
 
     @Mock
     private PublishingStatusDao publishingStatusDao;
+
+    @Mock
+    private CatalogDao catalogDao;
+
+    @Mock
+    private BookPublishRequestManager manager;
 
     @InjectMocks
     private SubmitBookForPublishingActivity activity;
@@ -53,6 +58,7 @@ public class SubmitBookForPublishingActivityTest {
         PublishingStatusItem item = new PublishingStatusItem();
         item.setPublishingRecordId("publishing.123");
         // KindlePublishingUtils generates a random publishing status ID for us
+
         when(publishingStatusDao.setPublishingStatus(anyString(),
                 eq(PublishingRecordStatus.QUEUED),
                 eq(request.getBookId()))).thenReturn(item);
@@ -61,6 +67,9 @@ public class SubmitBookForPublishingActivityTest {
         SubmitBookForPublishingResponse response = activity.execute(request);
 
         // THEN
+        verify(catalogDao).validateBookExists("book.123");
+        verify(manager).addBookPublishRequest(any(BookPublishRequest.class));
+
         assertEquals("publishing.123", response.getPublishingRecordId(), "Expected response to return a publishing" +
                 "record id.");
     }
@@ -83,6 +92,7 @@ public class SubmitBookForPublishingActivityTest {
         // WHEN
         SubmitBookForPublishingResponse response = activity.execute(request);
 
+        verify(manager).addBookPublishRequest(any(BookPublishRequest.class));
         // THEN
         assertEquals("publishing.123", response.getPublishingRecordId(), "Expected response to return a publishing" +
                 "record id.");
