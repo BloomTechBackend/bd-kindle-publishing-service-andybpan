@@ -5,6 +5,7 @@ import com.amazon.ata.kindlepublishingservice.exceptions.BookNotFoundException;
 import com.amazon.ata.kindlepublishingservice.publishing.KindleFormattedBook;
 import com.amazon.ata.kindlepublishingservice.utils.KindlePublishingUtils;
 
+import com.amazon.ata.recommendationsservice.types.BookGenre;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBQueryExpression;
 import org.apache.commons.lang3.StringUtils;
@@ -70,11 +71,39 @@ public class CatalogDao {
         return book;
     }
 
-    public void validateBookExists(String bookId) {
+    // Checks if the given bookId exists in the system
+    public CatalogItemVersion validateBookExists(String bookId) {
         CatalogItemVersion book = getLatestVersionOfBook(bookId);
 
         if (book == null) {
             throw new BookNotFoundException(String.format("No book found for id: %s", bookId));
         }
+        return book;
+    }
+
+    // Create, Save and Return a new Book Entry ()
+    public CatalogItemVersion createOrUpdateBook(KindleFormattedBook book) {
+        CatalogItemVersion item = new CatalogItemVersion();
+        item.setBookId(book.getBookId()); // TO BE DETERMINED
+        item.setInactive(false);
+        item.setTitle(book.getTitle());
+        item.setAuthor(book.getAuthor());
+        item.setText(book.getText());
+        item.setGenre(book.getGenre());
+
+        // if the book exists, then we update the book to the next version
+        // if not found, we throw an exception - it's built in
+        // otherwise - we generate a new bookId and start w/ version 1
+        if (book.getBookId() != null && !book.getBookId().isEmpty()) {
+            CatalogItemVersion removedBook = removeBookFromCatalog(book.getBookId());
+            item.setVersion(removedBook.getVersion() + 1);
+        } else {
+            item.setBookId(KindlePublishingUtils.generateBookId());
+            item.setVersion(1);
+        }
+
+        // save the updated version
+        dynamoDbMapper.save(item);
+        return item;
     }
 }

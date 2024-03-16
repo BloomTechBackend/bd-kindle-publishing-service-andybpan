@@ -14,10 +14,13 @@ import com.amazon.ata.kindlepublishingservice.utils.KindlePublishingUtils;
 import com.amazon.ata.recommendationsservice.types.BookGenre;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
+import dagger.Provides;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import javax.swing.text.Utilities;
+import java.util.LinkedList;
 
 /**
  * Implementation of the SubmitBookForPublishingActivity for ATACurriculumKindlePublishingService's
@@ -37,10 +40,10 @@ public class SubmitBookForPublishingActivity {
      * @param publishingStatusDao PublishingStatusDao to access the publishing status table.
      */
     @Inject
-    public SubmitBookForPublishingActivity(PublishingStatusDao publishingStatusDao, CatalogDao catalogDao) {
+    public SubmitBookForPublishingActivity(PublishingStatusDao publishingStatusDao, CatalogDao catalogDao, BookPublishRequestManager manager) {
         this.publishingStatusDao = publishingStatusDao;
         this.catalogDao = catalogDao;
-        this.manager = new BookPublishRequestManager();
+        this.manager = manager;
     }
 
     /**
@@ -61,7 +64,7 @@ public class SubmitBookForPublishingActivity {
         }
 
         // Submit the BookPublishRequest for processing
-        manager.addBookPublishRequestToProcess(bookPublishRequest);
+        manager.addBookPublishRequest(bookPublishRequest);
 
         PublishingStatusItem item =  publishingStatusDao.setPublishingStatus(bookPublishRequest.getPublishingRecordId(),
                 PublishingRecordStatus.QUEUED,
