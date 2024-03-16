@@ -1,23 +1,25 @@
 package com.amazon.ata.kindlepublishingservice.publishing;
 
-import dagger.Module;
-
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.LinkedList;
 import java.util.Queue;
 
+@Singleton
 public class BookPublishRequestManager {
     private final Queue<BookPublishRequest> bookPublishRequests;
 
-    public BookPublishRequestManager() {
-        this.bookPublishRequests = new LinkedList<>();
+    @Inject
+    public BookPublishRequestManager(Queue<BookPublishRequest> queue) {
+        this.bookPublishRequests = queue;
     }
 
-    public void addBookPublishRequestToProcess(BookPublishRequest request) {
+    public void addBookPublishRequest(BookPublishRequest request) {
         this.bookPublishRequests.offer(request);
     }
 
     // poll will automatically return null if the queue is empty;
-    public BookPublishRequest getBookPublishRequest(BookPublishRequest request) {
+    public BookPublishRequest getBookPublishRequestToProcess() {
         return this.bookPublishRequests.poll();
     }
 }
